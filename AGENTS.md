@@ -28,3 +28,8 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- AI provider calls live in `src/lib/ai/client.ts` (browser fetch + SSE parsing per provider); all prompts live in `src/lib/ai/prompts.ts`. Why: one place for provider quirks and prompt structure.
+- The user's API key is read via `useAISettings()` (session/local storage); never send it anywhere but the chosen provider. Why: app is intentionally frontend-only.
+- Web pages for research are fetched through `r.jina.ai` in `src/lib/fetch-url.ts`. Why: browsers can't read most sites cross-origin.
