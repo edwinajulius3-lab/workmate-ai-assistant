@@ -30,7 +30,7 @@ export function ApiRequiredNotice({ className }: { className?: string }) {
   );
 }
 
-export function ErrorNotice({ message, onRetry }: { message: string; onRetry?: () => void }) {
+export function ErrorNotice({ message, onRetry }: { message: string; onRetry?: (() => void) | undefined }) {
   return (
     <div
       role="alert"

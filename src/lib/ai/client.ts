@@ -107,7 +107,7 @@ function buildRequest(opts: GenerateOptions): { url: string; init: RequestInit; 
       stream: true,
       messages: [{ role: "system", content: system }, ...messages],
     };
-    if (json) body.response_format = { type: "json_object" };
+    if (json) body["response_format"] = { type: "json_object" };
     return {
       url,
       init: { method: "POST", headers, body: JSON.stringify(body) },
@@ -124,7 +124,7 @@ function buildRequest(opts: GenerateOptions): { url: string; init: RequestInit; 
         parts: [{ text: m.content }],
       })),
     };
-    if (json) body.generationConfig = { responseMimeType: "application/json" };
+    if (json) body["generationConfig"] = { responseMimeType: "application/json" };
     return {
       url,
       init: {
@@ -172,7 +172,7 @@ export async function generate(opts: GenerateOptions): Promise<string> {
 
   let res: Response;
   try {
-    res = await fetch(url, { ...init, signal: opts.signal });
+    res = await fetch(url, { ...init, signal: opts.signal ?? null });
   } catch (e) {
     if ((e as Error)?.name === "AbortError") throw new AIError("Generation stopped.", "aborted");
     throw new AIError(

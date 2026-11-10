@@ -61,7 +61,7 @@ export function parseEmail(text: string): { subject: string; body: string } {
   const trimmed = text.replace(/^\s+/, "");
   const match = trimmed.match(/^\**subject\**\s*:\s*(.*)(?:\r?\n|$)/i);
   if (!match) return { subject: "", body: trimmed };
-  const subject = match[1].replace(/\*+$/, "").trim();
+  const subject = (match[1] ?? "").replace(/\*+$/, "").trim();
   const body = trimmed.slice(match[0].length).replace(/^\s*\n/, "");
   return { subject, body };
 }
@@ -118,7 +118,7 @@ export function parseResearch(text: string): ResearchResult {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start === -1 || end <= start) throw new Error("The AI response was not in the expected format. Try regenerating.");
-  let obj: Record<string, unknown>;
+  let obj: { title?: unknown; summary?: unknown; keyFindings?: unknown; insights?: unknown; recommendations?: unknown };
   try {
     obj = JSON.parse(text.slice(start, end + 1));
   } catch {

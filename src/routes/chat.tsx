@@ -264,7 +264,7 @@ function ChatPage() {
               <PromptInputFooter className="justify-between">
                 <span className="pl-1 text-xs text-muted-foreground">Enter to send · Shift+Enter for a new line</span>
                 <PromptInputSubmit
-                  status={status === "error" ? undefined : status}
+                  status={status === "error" ? "ready" : status}
                   onStop={() => abortRef.current?.abort()}
                   disabled={!settings || (!busy && !input.trim())}
                   className="rounded-xl"

@@ -14,7 +14,7 @@ export async function fetchPageText(url: string, signal?: AbortSignal): Promise<
   let res: Response;
   try {
     res = await fetch(`https://r.jina.ai/${parsed.toString()}`, {
-      signal,
+      signal: signal ?? null,
       headers: { Accept: "text/plain" },
     });
   } catch (e) {
