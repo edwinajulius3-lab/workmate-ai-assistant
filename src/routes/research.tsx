@@ -17,7 +17,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { ApiRequiredNotice, Disclaimer, ErrorNotice, LoadingDots, PageHeader } from "@/components/app/notices";
+import { Disclaimer, ErrorNotice, LoadingDots, PageHeader } from "@/components/app/notices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -32,7 +32,6 @@ import {
   type ResearchResult,
   type ResearchSource,
 } from "@/lib/ai/prompts";
-import { useAISettings } from "@/lib/ai/settings";
 import { fetchPageText } from "@/lib/fetch-url";
 import { copyText, logActivity, readLocal, writeLocal } from "@/lib/storage";
 import { cn } from "@/lib/utils";
@@ -71,7 +70,6 @@ interface Saved {
 const EMPTY: Saved = { source: "topic", topic: "", article: "", url: "", focus: "", result: null };
 
 function ResearchPage() {
-  const settings = useAISettings();
   const [s, setS] = useState<Saved>(EMPTY);
   const [phase, setPhase] = useState<"idle" | "fetching" | "thinking">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -90,7 +88,6 @@ function ResearchPage() {
   const loading = phase !== "idle";
 
   const run = async () => {
-    if (!settings) return;
     setError(null);
     const raw = s.source === "topic" ? s.topic : s.source === "article" ? s.article : s.url;
     if (s.source === "topic" && raw.trim().length < 3) return setError("Enter a topic to research.");
@@ -107,12 +104,9 @@ function ResearchPage() {
         content = await fetchPageText(raw, controller.signal);
       }
       setPhase("thinking");
-      const { system, user } = researchPrompt({ source: s.source, content, focus: s.focus, url: raw });
       const full = await generate({
-        settings,
-        system,
-        messages: [{ role: "user", content: user }],
-        json: true,
+        task: "research",
+        input: { source: s.source, content: content.slice(0, 80000), focus: s.focus, url: raw },
         signal: controller.signal,
       });
       const result = parseResearch(full);
@@ -143,7 +137,6 @@ function ResearchPage() {
         description="Research a topic, summarise an article or read a web page — get a summary, key findings, insights and recommendations."
       />
 
-      {settings === null && <ApiRequiredNotice />}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,4fr)_minmax(0,7fr)]">
         <Card className="h-fit border-border/60 shadow-card">
@@ -227,7 +220,7 @@ function ResearchPage() {
                 <Square /> Stop
               </Button>
             ) : (
-              <Button variant="brand" size="lg" className="w-full" onClick={run} disabled={!settings}>
+              <Button variant="brand" size="lg" className="w-full" onClick={run}>
                 <Wand2 /> Generate briefing
               </Button>
             )}
@@ -236,7 +229,7 @@ function ResearchPage() {
         </Card>
 
         <div className="space-y-4">
-          {error && <ErrorNotice message={error} onRetry={settings ? run : undefined} />}
+          {error && <ErrorNotice message={error} onRetry={run} />}
 
           {loading ? (
             <Card className="border-border/60 shadow-card">
@@ -255,7 +248,7 @@ function ResearchPage() {
               </CardContent>
             </Card>
           ) : s.result ? (
-            <ResultView result={s.result} onChange={update} onCopyAll={copyAll} onRegenerate={run} canRegenerate={!!settings} />
+            <ResultView result={s.result} onChange={update} onCopyAll={copyAll} onRegenerate={run} canRegenerate />
           ) : (
             <Card className="border-dashed border-border bg-muted/40 shadow-none">
               <CardContent className="flex min-h-[420px] flex-col items-center justify-center p-8 text-center">
