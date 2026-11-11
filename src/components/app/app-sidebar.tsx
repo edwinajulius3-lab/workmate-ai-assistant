@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutDashboard, Mail, MessagesSquare, Search, Settings, ShieldCheck } from "lucide-react";
+import { LayoutDashboard, Mail, MessagesSquare, Search, ShieldCheck } from "lucide-react";
 
 import logo from "@/assets/logo.png";
 import {
@@ -15,8 +15,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { useAISettings, PROVIDERS } from "@/lib/ai/settings";
-import { cn } from "@/lib/utils";
 
 const main = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -29,7 +27,6 @@ export function AppSidebar() {
   const { state, setOpenMobile } = useSidebar();
   const collapsed = state === "collapsed";
   const pathname = useRouterState({ select: (r) => r.location.pathname });
-  const settings = useAISettings();
 
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -72,42 +69,17 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/settings"}
-                  tooltip="AI Settings"
-                  className="h-10 rounded-lg font-medium data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground"
-                >
-                  <Link to="/settings" onClick={() => setOpenMobile(false)}>
-                    <Settings />
-                    <span>AI Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter className="p-3">
         {!collapsed ? (
           <div className="rounded-xl bg-brand-soft p-3">
             <div className="flex items-center gap-2 text-xs font-semibold text-accent-foreground">
-              <span
-                className={cn(
-                  "size-2 rounded-full",
-                  settings ? "bg-success" : "bg-warning",
-                )}
-              />
-              {settings ? `Connected · ${PROVIDERS[settings.provider].name}` : "AI not connected"}
+              <span className="size-2 rounded-full bg-success" />
+              Built-in AI ready
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              {settings ? settings.model : "Add your API key to start."}
+              Powered by Lovable AI. No API key needed.
             </p>
           </div>
         ) : (

@@ -27,7 +27,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { AIError, errorMessage, generate } from "@/lib/ai/client";
 import {
   parseResearch,
-  researchPrompt,
   researchToText,
   type ResearchResult,
   type ResearchSource,

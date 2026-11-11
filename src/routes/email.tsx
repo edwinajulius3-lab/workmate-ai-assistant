@@ -137,7 +137,6 @@ function EmailPage() {
   };
 
   const hasOutput = Boolean(d.subject || d.body);
-  const disabled = false;
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-8 animate-fade-up">
@@ -242,7 +241,7 @@ function EmailPage() {
                 <Square /> Stop generating
               </Button>
             ) : (
-              <Button variant="brand" size="lg" className="w-full" onClick={run} disabled={disabled}>
+              <Button variant="brand" size="lg" className="w-full" onClick={run} >
                 <Wand2 /> Generate email
               </Button>
             )}
@@ -256,7 +255,7 @@ function EmailPage() {
               <Button size="sm" variant="outline" onClick={onCopy} disabled={!hasOutput || loading}>
                 {copied ? <Check /> : <Copy />} {copied ? "Copied" : "Copy"}
               </Button>
-              <Button size="sm" variant="soft" onClick={run} disabled={!hasOutput || loading || disabled}>
+              <Button size="sm" variant="soft" onClick={run} disabled={!hasOutput || loading}>
                 <RefreshCw /> Regenerate
               </Button>
               <Button
