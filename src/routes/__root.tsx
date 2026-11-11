@@ -88,12 +88,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "AI Workplace Productivity Assistant" },
       {
         name: "description",
-        content: "Write emails, research topics and get workplace answers with your own AI key.",
+        content: "Write emails, research topics and get workplace answers with built-in AI.",
       },
       { property: "og:title", content: "AI Workplace Productivity Assistant" },
       {
         property: "og:description",
-        content: "Write emails, research topics and get workplace answers with your own AI key.",
+        content: "Write emails, research topics and get workplace answers with built-in AI.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
