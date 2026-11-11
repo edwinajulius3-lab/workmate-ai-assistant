@@ -30,6 +30,6 @@ use the editor.
 <!-- LOVABLE:END -->
 
 ## Project rules
-- AI provider calls live in `src/lib/ai/client.ts` (browser fetch + SSE parsing per provider); all prompts live in `src/lib/ai/prompts.ts`. Why: one place for provider quirks and prompt structure.
-- The user's API key is read via `useAISettings()` (session/local storage); never send it anywhere but the chosen provider. Why: app is intentionally frontend-only.
+- AI runs on Lovable AI Gateway through the single server route `src/routes/api/ai.ts`; the browser calls it via `generate()` in `src/lib/ai/client.ts` (NDJSON stream). Why: keeps LOVABLE_API_KEY server-side and one place for streaming/error handling.
+- The browser sends only a task + inputs validated by `src/lib/ai/request.ts`; the server builds prompts from `src/lib/ai/prompts.ts`. Why: callers can't inject their own instructions or misuse workspace credits.
 - Web pages for research are fetched through `r.jina.ai` in `src/lib/fetch-url.ts`. Why: browsers can't read most sites cross-origin.
