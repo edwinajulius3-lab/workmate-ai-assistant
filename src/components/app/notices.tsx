@@ -1,34 +1,7 @@
-import { Link } from "@tanstack/react-router";
-import { AlertCircle, KeyRound, ShieldCheck } from "lucide-react";
+import { AlertCircle, ShieldCheck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-export function ApiRequiredNotice({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        "flex flex-col gap-4 rounded-2xl border border-warning/30 bg-warning-soft p-5 sm:flex-row sm:items-center",
-        className,
-      )}
-      role="status"
-    >
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface text-warning">
-        <KeyRound className="size-5" />
-      </div>
-      <div className="flex-1">
-        <p className="font-semibold text-foreground">AI connection required</p>
-        <p className="mt-0.5 text-sm text-muted-foreground">
-          This tool generates real AI responses, so it needs an API key from OpenAI, Google Gemini,
-          Anthropic or OpenRouter. Nothing is simulated — without a key, generation is switched off.
-        </p>
-      </div>
-      <Button asChild variant="brand">
-        <Link to="/settings">Connect AI</Link>
-      </Button>
-    </div>
-  );
-}
 
 export function ErrorNotice({ message, onRetry }: { message: string; onRetry?: (() => void) | undefined }) {
   return (
@@ -54,8 +27,8 @@ export function Disclaimer({ className }: { className?: string }) {
       <span>
         <strong className="font-semibold text-foreground">Responsible AI:</strong> AI-generated
         content can be inaccurate, incomplete or biased. Review, fact-check and edit before you rely
-        on or send it. Avoid sharing confidential or personal data — your prompts go directly to
-        the AI provider you connect.
+        on or send it. Avoid sharing confidential or personal data — your prompts are sent to the
+        AI service to generate a reply.
       </span>
     </p>
   );

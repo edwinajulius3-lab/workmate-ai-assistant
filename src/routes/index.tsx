@@ -1,10 +1,9 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, BookOpen, Clock, KeyRound, Mail, MessagesSquare, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight, BookOpen, Clock, Mail, MessagesSquare, ShieldCheck, Zap } from "lucide-react";
 
 import { Disclaimer } from "@/components/app/notices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PROVIDERS, useAISettings } from "@/lib/ai/settings";
 import { ACTIVITY_KEY, useLocalValue, type ActivityItem } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +18,7 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "AI Workplace Productivity Assistant" },
       {
         property: "og:description",
-        content: "Smart emails, research briefings and a workplace chatbot powered by your own AI key.",
+        content: "Smart emails, research briefings and a workplace chatbot powered by built-in AI.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -66,7 +65,6 @@ function timeAgo(ts: number) {
 }
 
 function Dashboard() {
-  const settings = useAISettings();
   const activity = useLocalValue<ActivityItem[]>(ACTIVITY_KEY, []);
   const counts = {
     email: activity.filter((a) => a.kind === "email").length,
@@ -85,8 +83,8 @@ function Dashboard() {
             Get through your workday <span className="text-gradient-brand">faster</span>.
           </h1>
           <p className="mt-3 text-base text-muted-foreground">
-            Draft emails, research anything and get answers to workplace questions — powered by the AI
-            provider you connect.
+            Draft emails, research anything and get answers to workplace questions — powered by built-in AI,
+            ready to use with no setup.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button asChild variant="brand" size="lg">
@@ -102,8 +100,6 @@ function Dashboard() {
         <div aria-hidden className="pointer-events-none absolute -right-16 -top-16 size-72 rounded-full bg-brand/15 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-24 right-24 size-56 rounded-full bg-brand-deep/10 blur-3xl" />
       </section>
-
-      <ConnectionCard connected={settings} />
 
       <section className="grid gap-4 md:grid-cols-3">
         {TOOLS.map((t, i) => (
@@ -193,36 +189,5 @@ function Dashboard() {
         </Card>
       </section>
     </main>
-  );
-}
-
-function ConnectionCard({ connected }: { connected: ReturnType<typeof useAISettings> }) {
-  if (connected === undefined) return <div className="h-[76px]" />;
-  return (
-    <Card
-      className={cn(
-        "border shadow-none animate-fade-up",
-        connected ? "border-success/25 bg-success-soft" : "border-warning/30 bg-warning-soft",
-      )}
-    >
-      <CardContent className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-surface">
-          <KeyRound className={cn("size-5", connected ? "text-success" : "text-warning")} />
-        </div>
-        <div className="flex-1">
-          <p className="font-semibold text-foreground">
-            {connected ? `AI connected · ${PROVIDERS[connected.provider].name}` : "Connect an AI provider to get started"}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {connected
-              ? `All assistants use ${connected.model}. Requests go straight from your browser to the provider.`
-              : "Every assistant generates real AI responses, so an API key is required. Nothing is simulated."}
-          </p>
-        </div>
-        <Button asChild variant={connected ? "outline" : "brand"} className={cn(connected && "bg-surface")}>
-          <Link to="/settings">{connected ? "Manage" : "Add API key"}</Link>
-        </Button>
-      </CardContent>
-    </Card>
   );
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import logo from "@/assets/logo.png";
-import { ApiRequiredNotice, Disclaimer, PageHeader } from "@/components/app/notices";
+import { Disclaimer, PageHeader } from "@/components/app/notices";
 import {
   Conversation,
   ConversationContent,
@@ -28,8 +28,7 @@ import {
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import { Button } from "@/components/ui/button";
 import { AIError, errorMessage, generate, type ChatTurn } from "@/lib/ai/client";
-import { CHAT_SYSTEM_PROMPT } from "@/lib/ai/prompts";
-import { useAISettings } from "@/lib/ai/settings";
+import { MAX_CHAT_TURNS } from "@/lib/ai/request";
 import { copyText, logActivity, readLocal, writeLocal } from "@/lib/storage";
 
 export const Route = createFileRoute("/chat")({
@@ -54,7 +53,6 @@ interface ChatMessage {
 }
 
 const CHAT_KEY = "wpa.chat";
-const MAX_CONTEXT = 40;
 
 const SUGGESTIONS = [
   "How do I prioritise when everything feels urgent?",
@@ -66,7 +64,6 @@ const SUGGESTIONS = [
 type Status = "ready" | "submitted" | "streaming" | "error";
 
 function ChatPage() {
-  const settings = useAISettings();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [status, setStatus] = useState<Status>("ready");
@@ -87,19 +84,17 @@ function ChatPage() {
   const busy = status === "submitted" || status === "streaming";
 
   const respond = async (history: ChatMessage[]) => {
-    if (!settings) return;
     const controller = new AbortController();
     abortRef.current = controller;
     const assistantId = crypto.randomUUID();
     setStatus("submitted");
     const turns: ChatTurn[] = history
       .filter((m) => !m.error)
-      .slice(-MAX_CONTEXT)
+      .slice(-MAX_CHAT_TURNS)
       .map(({ role, content }) => ({ role, content }));
     try {
       await generate({
-        settings,
-        system: CHAT_SYSTEM_PROMPT,
+        task: "chat",
         messages: turns,
         signal: controller.signal,
         onDelta: (_c, full) => {
@@ -131,7 +126,7 @@ function ChatPage() {
 
   const send = (text: string) => {
     const content = text.trim();
-    if (!content || busy || !settings) return;
+    if (!content || busy) return;
     const next: ChatMessage[] = [
       ...messages.filter((m) => !m.error),
       { id: crypto.randomUUID(), role: "user", content },
@@ -176,8 +171,6 @@ function ChatPage() {
         }
       />
 
-      {settings === null && <ApiRequiredNotice />}
-
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-2xl border border-border/60 bg-surface shadow-card">
         <Conversation className="min-h-0 flex-1">
           <ConversationContent className="mx-auto w-full max-w-3xl gap-6 px-4 py-6 sm:px-6">
@@ -196,7 +189,6 @@ function ChatPage() {
                     <button
                       key={s}
                       type="button"
-                      disabled={!settings}
                       onClick={() => send(s)}
                       className="rounded-xl border border-border bg-background px-3.5 py-3 text-left text-sm text-foreground transition-all hover:border-brand/50 hover:bg-brand-soft disabled:cursor-not-allowed disabled:opacity-50"
                     >
@@ -231,7 +223,7 @@ function ChatPage() {
                     <MessageActions>
                       {!m.error && <CopyAction text={m.content} />}
                       {i === Math.max(lastAssistantIdx, messages.length - 1) && (
-                        <MessageAction tooltip="Regenerate" onClick={regenerate} disabled={!settings}>
+                        <MessageAction tooltip="Regenerate" onClick={regenerate}>
                           <RefreshCw className="size-3.5" />
                         </MessageAction>
                       )}
@@ -258,15 +250,14 @@ function ChatPage() {
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.currentTarget.value)}
-                placeholder={settings ? "Ask a workplace question…" : "Connect an AI provider in Settings to start chatting"}
-                disabled={!settings}
+                placeholder="Ask a workplace question…"
               />
               <PromptInputFooter className="justify-between">
                 <span className="pl-1 text-xs text-muted-foreground">Enter to send · Shift+Enter for a new line</span>
                 <PromptInputSubmit
                   status={status === "error" ? "ready" : status}
                   onStop={() => abortRef.current?.abort()}
-                  disabled={!settings || (!busy && !input.trim())}
+                  disabled={!busy && !input.trim()}
                   className="rounded-xl"
                 />
               </PromptInputFooter>

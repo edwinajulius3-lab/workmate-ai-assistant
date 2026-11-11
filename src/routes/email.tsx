@@ -3,15 +3,14 @@ import { Briefcase, Check, Copy, Loader2, Mail, RefreshCw, Smile, Square, Target
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { ApiRequiredNotice, Disclaimer, ErrorNotice, LoadingDots, PageHeader } from "@/components/app/notices";
+import { Disclaimer, ErrorNotice, LoadingDots, PageHeader } from "@/components/app/notices";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { AIError, errorMessage, generate } from "@/lib/ai/client";
-import { emailPrompt, parseEmail, type EmailLength, type EmailTone } from "@/lib/ai/prompts";
-import { useAISettings } from "@/lib/ai/settings";
+import { parseEmail, type EmailLength, type EmailTone } from "@/lib/ai/prompts";
 import { copyText, logActivity, readLocal, writeLocal } from "@/lib/storage";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +71,6 @@ const EMPTY: Draft = {
 };
 
 function EmailPage() {
-  const settings = useAISettings();
   const [d, setD] = useState<Draft>(EMPTY);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +90,6 @@ function EmailPage() {
   const set = <K extends keyof Draft>(k: K, v: Draft[K]) => setD((p) => ({ ...p, [k]: v }));
 
   const run = async () => {
-    if (!settings) return;
     if (d.instructions.trim().length < 8) {
       setError("Describe what the email should say (at least a sentence).");
       return;
@@ -102,12 +99,17 @@ function EmailPage() {
     setLoading(true);
     setError(null);
     setD((p) => ({ ...p, subject: "", body: "" }));
-    const { system, user } = emailPrompt(d);
     try {
       const full = await generate({
-        settings,
-        system,
-        messages: [{ role: "user", content: user }],
+        task: "email",
+        input: {
+          instructions: d.instructions,
+          tone: d.tone,
+          length: d.length,
+          recipient: d.recipient,
+          sender: d.sender,
+          context: d.context,
+        },
         signal: controller.signal,
         onDelta: (_c, text) => {
           const parsed = parseEmail(text);
@@ -135,7 +137,6 @@ function EmailPage() {
   };
 
   const hasOutput = Boolean(d.subject || d.body);
-  const disabled = !settings;
 
   return (
     <main className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-8 animate-fade-up">
@@ -144,8 +145,6 @@ function EmailPage() {
         title="Smart Email Generator"
         description="Describe what you need and get a personalised, professional email you can edit, copy and send."
       />
-
-      {settings === null && <ApiRequiredNotice />}
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <Card className="h-fit border-border/60 shadow-card">
@@ -242,7 +241,7 @@ function EmailPage() {
                 <Square /> Stop generating
               </Button>
             ) : (
-              <Button variant="brand" size="lg" className="w-full" onClick={run} disabled={disabled}>
+              <Button variant="brand" size="lg" className="w-full" onClick={run} >
                 <Wand2 /> Generate email
               </Button>
             )}
@@ -256,7 +255,7 @@ function EmailPage() {
               <Button size="sm" variant="outline" onClick={onCopy} disabled={!hasOutput || loading}>
                 {copied ? <Check /> : <Copy />} {copied ? "Copied" : "Copy"}
               </Button>
-              <Button size="sm" variant="soft" onClick={run} disabled={!hasOutput || loading || disabled}>
+              <Button size="sm" variant="soft" onClick={run} disabled={!hasOutput || loading}>
                 <RefreshCw /> Regenerate
               </Button>
               <Button
@@ -271,7 +270,7 @@ function EmailPage() {
             </div>
           </CardHeader>
           <CardContent className="flex flex-1 flex-col gap-3">
-            {error && <ErrorNotice message={error} onRetry={settings ? run : undefined} />}
+            {error && <ErrorNotice message={error} onRetry={run} />}
             {!hasOutput && !loading ? (
               <div className="flex flex-1 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/40 p-8 text-center">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-brand-soft text-brand-deep">

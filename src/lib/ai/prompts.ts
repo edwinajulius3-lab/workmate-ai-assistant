@@ -22,9 +22,9 @@ export interface EmailInput {
   instructions: string;
   tone: EmailTone;
   length: EmailLength;
-  recipient?: string;
-  sender?: string;
-  context?: string;
+  recipient?: string | undefined;
+  sender?: string | undefined;
+  context?: string | undefined;
 }
 
 export function emailPrompt(input: EmailInput) {
@@ -71,8 +71,8 @@ export type ResearchSource = "topic" | "article" | "url";
 export interface ResearchInput {
   source: ResearchSource;
   content: string;
-  focus?: string;
-  url?: string;
+  focus?: string | undefined;
+  url?: string | undefined;
 }
 
 export interface ResearchResult {
