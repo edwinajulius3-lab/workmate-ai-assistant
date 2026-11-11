@@ -64,7 +64,6 @@ export const Route = createFileRoute("/api/ai")({
             {
               model: MODEL,
               input,
-              stream: true,
               ...(json ? { text: { format: { type: "json_object" as const } } } : {}),
             },
             { signal: request.signal },
